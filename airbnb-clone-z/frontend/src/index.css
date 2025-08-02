@@ -1,0 +1,50 @@
+/* PLEASE NOTE: THESE TAILWIND IMPORTS SHOULD NEVER BE DELETED */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+/* DO NOT DELETE THESE TAILWIND IMPORTS, OTHERWISE THE STYLING WILL NOT RENDER AT ALL */
+/* Custom styles beyond Tailwind */
+body {
+  font-family: 'Circular', -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #222222;
+  background-color: #fff;
+}
+/* Airbnb-like button styles */
+.btn-airbnb {
+  @apply bg-[#FF5A5F] text-white font-medium py-2 px-4 rounded-md hover:bg-[#FF4A4F] transition-colors;
+}
+/* Card hover effects */
+.listing-card {
+  @apply transition-all duration-200;
+}
+.listing-card:hover {
+  @apply shadow-lg transform translate-y-[-2px];
+}
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+/* Image gallery styles */
+.image-gallery {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-2 mb-8 relative;
+}
+.image-gallery-main {
+  @apply aspect-w-16 aspect-h-9 md:aspect-w-4 md:aspect-h-3 rounded-tl-xl rounded-bl-xl overflow-hidden;
+}
+/* Airbnb-like input focus styles */
+input:focus, textarea:focus, select:focus {
+  @apply ring-[#FF5A5F] border-[#FF5A5F];
+}
