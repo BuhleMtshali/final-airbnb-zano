@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createListing } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { fetchListing, updateListing } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { PlusIcon, XIcon } from 'lucide-react';
-export const CreateListing = () => {
+export const UpdateListing = () => {
+  const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
   const [images, setImages] = useState([]);
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -38,6 +40,119 @@ export const CreateListing = () => {
       workspace: false
     }
   });
+  useEffect(() => {
+    const getListing = async () => {
+      try {
+        const listingData = await fetchListing(id);
+        // Check if this listing belongs to the current user
+        if (listingData.hostId !== user.uid) {
+          setError('You do not have permission to edit this listing');
+          return;
+        }
+        setFormData({
+          title: listingData.title || '',
+          description: listingData.description || '',
+          category: listingData.category || '',
+          address: listingData.address || '',
+          city: listingData.city || '',
+          state: listingData.state || '',
+          zipCode: listingData.zipCode || '',
+          country: listingData.country || '',
+          price: listingData.price || '',
+          bedrooms: listingData.bedrooms || 1,
+          beds: listingData.beds || 1,
+          bathrooms: listingData.bathrooms || 1,
+          guests: listingData.guests || 1,
+          amenities: listingData.amenities || {
+            wifi: false,
+            kitchen: false,
+            parking: false,
+            pool: false,
+            airConditioning: false,
+            washer: false,
+            dryer: false,
+            tv: false,
+            heating: false,
+            workspace: false
+          }
+        });
+        // Convert image URLs to our format
+        if (listingData.imageUrls && listingData.imageUrls.length > 0) {
+          const formattedImages = listingData.imageUrls.map((url, index) => ({
+            id: `existing-${index}`,
+            url: url
+          }));
+          setImages(formattedImages);
+        }
+      } catch (err) {
+        setError('Failed to load listing data');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getListing();
+  }, [id, user]);
+  // For demo purposes, let's create some mock data
+  useEffect(() => {
+    // This simulates fetching data from an API
+    const mockListing = {
+      id: '101',
+      title: 'Modern Downtown Apartment',
+      description: 'Stylish apartment in the heart of downtown with amazing city views.',
+      category: 'city',
+      address: '123 Main St',
+      city: 'Seattle',
+      state: 'Washington',
+      zipCode: '98101',
+      country: 'US',
+      price: '120',
+      bedrooms: 2,
+      beds: 2,
+      bathrooms: 1,
+      guests: 4,
+      amenities: {
+        wifi: true,
+        kitchen: true,
+        parking: true,
+        pool: false,
+        airConditioning: true,
+        washer: true,
+        dryer: true,
+        tv: true,
+        heating: true,
+        workspace: true
+      },
+      imageUrls: [
+        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
+        'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
+        'https://images.unsplash.com/photo-1585128792020-803d29415281?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80'
+      ],
+      hostId: user?.uid // Ensure this listing belongs to the current user
+    };
+    setFormData({
+      title: mockListing.title,
+      description: mockListing.description,
+      category: mockListing.category,
+      address: mockListing.address,
+      city: mockListing.city,
+      state: mockListing.state,
+      zipCode: mockListing.zipCode,
+      country: mockListing.country,
+      price: mockListing.price,
+      bedrooms: mockListing.bedrooms,
+      beds: mockListing.beds,
+      bathrooms: mockListing.bathrooms,
+      guests: mockListing.guests,
+      amenities: mockListing.amenities
+    });
+    const formattedImages = mockListing.imageUrls.map((url, index) => ({
+      id: `existing-${index}`,
+      url: url
+    }));
+    setImages(formattedImages);
+    setLoading(false);
+  }, [user]);
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
@@ -79,27 +194,28 @@ export const CreateListing = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     setError('');
     try {
-      // In a real app, you would upload images to storage first
-      // Then add their URLs to the listing data
+      // In a real app, you would upload new images to storage first
+      // Then update the listing data with all image URLs
       const listingData = {
         ...formData,
+        id,
         hostId: user.uid,
         imageUrls: images.map(img => img.url),
-        createdAt: new Date().toISOString()
+        updatedAt: new Date().toISOString()
       };
-      await createListing(listingData);
+      await updateListing(id, listingData);
       setSuccess(true);
       // Redirect after a short delay
       setTimeout(() => {
         navigate('/my-listings');
       }, 2000);
     } catch (err) {
-      setError(err.message || 'Failed to create listing');
+      setError(err.message || 'Failed to update listing');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
   const renderStepIndicator = () => (
@@ -469,7 +585,7 @@ export const CreateListing = () => {
   const renderPhotos = () => (
     <div>
       <div className="mb-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Upload Photos</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Update Photos</h3>
         <p className="text-sm text-gray-500 mb-4">
           Add at least 5 photos of your place. High-quality photos attract more guests!
         </p>
@@ -506,23 +622,6 @@ export const CreateListing = () => {
             </div>
           )}
         </div>
-        {images.length === 0 && (
-          <div className="text-center p-6 border-2 border-dashed border-gray-300 rounded-lg">
-            <label htmlFor="main-photo-upload" className="cursor-pointer">
-              <PlusIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-              <span className="text-sm font-medium text-gray-600">Add photos of your place</span>
-              <input
-                id="main-photo-upload"
-                name="photos"
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageUpload}
-                className="sr-only"
-              />
-            </label>
-          </div>
-        )}
       </div>
       {error && (
         <div className="mb-6 bg-red-50 border-l-4 border-red-400 p-4">
@@ -547,7 +646,7 @@ export const CreateListing = () => {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-green-700">Listing created successfully! Redirecting...</p>
+              <p className="text-sm text-green-700">Listing updated successfully! Redirecting...</p>
             </div>
           </div>
         </div>
@@ -562,31 +661,38 @@ export const CreateListing = () => {
         </button>
         <button
           type="submit"
-          disabled={loading || success}
+          disabled={submitting || success}
           className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#FF5A5F] hover:bg-[#FF4A4F] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF5A5F] ${
-            (loading || success) ? 'opacity-70 cursor-not-allowed' : ''
+            (submitting || success) ? 'opacity-70 cursor-not-allowed' : ''
           }`}
         >
-          {loading ? (
+          {submitting ? (
             <>
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Processing...
+              Updating...
             </>
-          ) : success ? 'Created!' : 'Create Listing'}
+          ) : success ? 'Updated!' : 'Update Listing'}
         </button>
       </div>
     </div>
   );
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF5A5F]"></div>
+      </div>
+    );
+  }
   return (
     <div className="bg-gray-100 min-h-screen py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-4 py-5 sm:p-6">
             <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
-              Create a New Listing
+              Update Listing
             </h2>
             {renderStepIndicator()}
             <form onSubmit={handleSubmit}>
