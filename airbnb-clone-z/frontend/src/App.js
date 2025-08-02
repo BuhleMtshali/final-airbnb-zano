@@ -9,11 +9,12 @@ import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
 import { CreateListing } from './pages/CreateListing'
 import { ViewListings } from './pages/ViewListings'
-import { UpdateListing } from './pages/UpdateListing'
+import { UpdateListing } from './pages/UpdatedListing'
 import { LocationPage } from './pages/LocationPage'
 import { LocationDetails } from './pages/LocationDetails'
 import { Reservations } from './pages/Reservations'
-export function App() {
+
+function App() {
   return (
     <Router>
       <AuthProvider>
@@ -74,3 +75,5 @@ export function App() {
     </Router>
   )
 }
+
+export default App;
