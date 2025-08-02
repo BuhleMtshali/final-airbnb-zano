@@ -1,9 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const { loginUser, registerUser } = require("../controllers/userController");
 
-// Placeholder route
-router.get("/", (req, res) => {
-  res.send("User route is working!");
-});
+router.post("/login", loginUser);
+router.post("/register", registerUser);
 
 module.exports = router;
