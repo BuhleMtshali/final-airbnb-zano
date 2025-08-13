@@ -1,11 +1,12 @@
-// 📁 Register.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+axios.defaults.withCredentials = true; // ⬅️ send cookies/tokens automatically
+
 const Register = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    username: '', // make sure matches backend
     email: '',
     password: '',
   });
@@ -22,7 +23,7 @@ const Register = () => {
       await axios.post(
         'http://localhost:5000/api/users/register',
         formData,
-        { withCredentials: true } // ✅ Allow cookies/session if needed
+        { withCredentials: true }
       );
       navigate('/login');
     } catch (err) {
@@ -32,23 +33,18 @@ const Register = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow-md w-80"
-      >
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-80">
         <h2 className="text-2xl font-bold mb-4">Register</h2>
         {error && <p className="text-red-500 mb-2">{error}</p>}
-        
         <input
           type="text"
-          name="name"
+          name="username"
           placeholder="Full Name"
-          value={formData.name}
+          value={formData.username}
           onChange={handleChange}
           className="w-full mb-4 px-3 py-2 border rounded"
           required
         />
-        
         <input
           type="email"
           name="email"
@@ -58,7 +54,6 @@ const Register = () => {
           className="w-full mb-4 px-3 py-2 border rounded"
           required
         />
-        
         <input
           type="password"
           name="password"
@@ -68,11 +63,7 @@ const Register = () => {
           className="w-full mb-4 px-3 py-2 border rounded"
           required
         />
-        
-        <button
-          type="submit"
-          className="w-full bg-[#FF5A5F] text-white py-2 rounded hover:bg-[#e14b4f]"
-        >
+        <button type="submit" className="w-full bg-[#FF5A5F] text-white py-2 rounded">
           Sign Up
         </button>
       </form>
