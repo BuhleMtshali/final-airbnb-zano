@@ -5,28 +5,35 @@ require("dotenv").config();
 
 const app = express();
 
-// ✅ Bulletproof CORS setup
+// CORS config
 const corsOptions = {
-  origin: "http://localhost:3000",
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: "Content-Type,Authorization",
+  origin: 'http://localhost:3000',
   credentials: true,
 };
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Handle preflight requests
-
-// Middleware to parse JSON bodies
 app.use(express.json());
 
-// Routes
-app.use("/api/users", require("./routes/userRoutes"));
-app.use("/api/accommodations", require("./routes/accommodationRoutes"));
-app.use("/api/reservations", require("./routes/reservationRoutes"));
+// Function to safely load routes
+const safeRoute = (path, routeFile) => {
+  try {
+    console.log(`🔄 Loading route: ${routeFile} at path: ${path}`);
+    app.use(path, require(routeFile));
+    console.log(`✅ Loaded route: ${routeFile}`);
+  } catch (err) {
+    console.error(`❌ Failed to load route: ${routeFile}`);
+    console.error(err);
+  }
+};
 
-// DB connection + server start
-mongoose
-  .connect(process.env.MONGO_URI)
+// Load routes one by one so we can see which one fails
+safeRoute("/api/users", "./routes/userRoutes");
+safeRoute("/api/accommodations", "./routes/accommodationRoutes");
+safeRoute("/api/reservations", "./routes/reservationRoutes");
+
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    app.listen(5000, () => console.log("✅ Server running on port 5000"));
+    console.log("✅ MongoDB connected");
+    app.listen(5000, () => console.log("🚀 Server running on port 5000"));
   })
-  .catch((err) => console.log(err));
+  .catch(err => console.log("❌ MongoDB connection error:", err));

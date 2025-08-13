@@ -19,7 +19,11 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/users/register', formData);
+      await axios.post(
+        'http://localhost:5000/api/users/register',
+        formData,
+        { withCredentials: true } // ✅ Allow cookies/session if needed
+      );
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
@@ -28,9 +32,13 @@ const Register = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-80">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded shadow-md w-80"
+      >
         <h2 className="text-2xl font-bold mb-4">Register</h2>
         {error && <p className="text-red-500 mb-2">{error}</p>}
+        
         <input
           type="text"
           name="name"
@@ -40,6 +48,7 @@ const Register = () => {
           className="w-full mb-4 px-3 py-2 border rounded"
           required
         />
+        
         <input
           type="email"
           name="email"
@@ -49,6 +58,7 @@ const Register = () => {
           className="w-full mb-4 px-3 py-2 border rounded"
           required
         />
+        
         <input
           type="password"
           name="password"
@@ -58,7 +68,11 @@ const Register = () => {
           className="w-full mb-4 px-3 py-2 border rounded"
           required
         />
-        <button type="submit" className="w-full bg-[#FF5A5F] text-white py-2 rounded">
+        
+        <button
+          type="submit"
+          className="w-full bg-[#FF5A5F] text-white py-2 rounded hover:bg-[#e14b4f]"
+        >
           Sign Up
         </button>
       </form>
