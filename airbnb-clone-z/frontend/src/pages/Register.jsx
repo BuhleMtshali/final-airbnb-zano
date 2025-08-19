@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// 📁 Register.jsx
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-axios.defaults.withCredentials = true; // 🔐 allow cookies/tokens with requests
+// ✅ Always send cookies/tokens if backend sets them
+axios.defaults.withCredentials = true;
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    username: '', // ✅ matches backend
-    email: '',
-    password: '',
-    role: 'user', // optional, default role
+    username: "", // must match backend (username, not name)
+    email: "",
+    password: "",
   });
 
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,25 +23,25 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
     try {
       const res = await axios.post(
-        'http://localhost:5000/api/users/register',
+        "http://localhost:5000/api/users/register",
         formData,
         { withCredentials: true }
       );
 
-      console.log('✅ Registered:', res.data);
+      console.log("✅ Registration success:", res.data);
 
-      // Option A: Redirect to login page
-      navigate('/login');
-
-      // Option B: Auto-login after register (uncomment if you want that)
-      // localStorage.setItem("userInfo", JSON.stringify(res.data));
-      // navigate('/dashboard');
-
+      // Redirect to login page
+      navigate("/login");
     } catch (err) {
-      console.error('❌ Registration error:', err);
-      setError(err.response?.data?.message || 'Registration failed');
+      console.error("❌ Registration error:", err);
+      setError(err.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,6 +52,7 @@ const Register = () => {
         className="bg-white p-6 rounded shadow-md w-80"
       >
         <h2 className="text-2xl font-bold mb-4">Register</h2>
+
         {error && <p className="text-red-500 mb-2">{error}</p>}
 
         <input
@@ -84,9 +87,10 @@ const Register = () => {
 
         <button
           type="submit"
-          className="w-full bg-[#FF5A5F] text-white py-2 rounded"
+          disabled={loading}
+          className="w-full bg-[#FF5A5F] text-white py-2 rounded disabled:opacity-50"
         >
-          Sign Up
+          {loading ? "Signing up..." : "Sign Up"}
         </button>
       </form>
     </div>
