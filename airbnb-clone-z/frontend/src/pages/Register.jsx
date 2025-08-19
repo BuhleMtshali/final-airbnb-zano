@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-// ✅ Always send cookies/tokens if backend sets them
+
 axios.defaults.withCredentials = true;
 
 const Register = () => {
