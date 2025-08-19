@@ -38,8 +38,9 @@ const Register = () => {
       // Redirect to login page
       navigate("/login");
     } catch (err) {
-      console.error("❌ Registration error:", err);
-      setError(err.response?.data?.message || "Registration failed");
+      //console.error("❌ Registration error:", err);
+      console.log("got to log in ")
+      setError(err.response?.data?.message || "got to log in ");
     } finally {
       setLoading(false);
     }
